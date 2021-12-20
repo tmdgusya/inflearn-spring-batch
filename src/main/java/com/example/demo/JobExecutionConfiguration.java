@@ -46,8 +46,8 @@ public class JobExecutionConfiguration {
                     @Override
                     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
                         System.out.println("step2 has executed");
-                        throw new RuntimeException("step2 has failed");
-//                        return RepeatStatus.FINISHED;
+//                        throw new RuntimeException("step2 has failed");
+                        return RepeatStatus.FINISHED;
                     }
                 }).build();
     }
