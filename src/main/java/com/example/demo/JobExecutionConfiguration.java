@@ -19,14 +19,12 @@ public class JobExecutionConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final JobExecutionListener jobExecutionListener;
 
     @Bean
     public Job batchJob() {
         return this.jobBuilderFactory.get("Job")
                 .start(step1())
                 .next(step2())
-                .listener(jobExecutionListener)
                 .build();
     }
 
