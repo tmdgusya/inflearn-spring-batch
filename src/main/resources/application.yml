@@ -25,7 +25,7 @@ spring:
       initialize-schema: always
     job:
       enabled: true
-      names: batchJob1
+      names: ${job.name:NONE}
   config:
     activate:
       on-profile: mysql
