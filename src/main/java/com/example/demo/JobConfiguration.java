@@ -1,19 +1,20 @@
 package com.example.demo;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepContribution;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.job.builder.FlowBuilder;
-import org.springframework.batch.core.job.flow.Flow;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Objects;
+
+@Slf4j
 @RequiredArgsConstructor
 @Configuration
 public class JobConfiguration {
@@ -27,6 +28,28 @@ public class JobConfiguration {
                 .start(step1())
                 .next(step2())
                 .next(step3())
+                .incrementer(new RunIdIncrementer())
+                .validator(new JobParametersValidator() {
+                    @Override
+                    public void validate(JobParameters jobParameters) throws JobParametersInvalidException {
+                        String name = jobParameters.getString("name");
+                        if (name != null) {
+                            log.info("validator executed : {}", name);
+                        }
+                    }
+                })
+                .preventRestart()
+                .listener(new JobExecutionListener() {
+                    @Override
+                    public void beforeJob(JobExecution jobExecution) {
+                        System.out.println("BEFORE EXECUTE JOB");
+                    }
+
+                    @Override
+                    public void afterJob(JobExecution jobExecution) {
+                        System.out.println("AFTER EXECUTE JOB");
+                    }
+                })
                 .build();
     }
     @Bean
