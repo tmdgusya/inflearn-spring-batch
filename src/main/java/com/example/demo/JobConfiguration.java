@@ -26,18 +26,9 @@ public class JobConfiguration {
         return this.jobBuilderFactory.get("batchJob1")
                 .start(step1())
                 .next(step2())
+                .next(step3())
                 .build();
     }
-
-    @Bean
-    public Job batchJob2() {
-        return this.jobBuilderFactory.get("batchJob2")
-                .start(flow())
-                .next(step5())
-                .end()
-                .build();
-    }
-
     @Bean
     public Step step1() {
         return stepBuilderFactory.get("step1")
@@ -63,18 +54,6 @@ public class JobConfiguration {
     }
 
     @Bean
-    public Flow flow() {
-        FlowBuilder<Flow> flowBuilder = new FlowBuilder<>("flow1");
-
-        flowBuilder
-                .start(step3())
-                .next(step4())
-                .end();
-
-        return flowBuilder.build();
-    }
-
-    @Bean
     public Step step3() {
         return stepBuilderFactory.get("step3")
                 .tasklet(new Tasklet() {
@@ -86,28 +65,5 @@ public class JobConfiguration {
                 }).build();
     }
 
-    @Bean
-    public Step step4() {
-        return stepBuilderFactory.get("step4")
-                .tasklet(new Tasklet() {
-                    @Override
-                    public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-                        System.out.println("step4 has executed");
-                        return RepeatStatus.FINISHED;
-                    }
-                }).build();
-    }
-
-    @Bean
-    public Step step5() {
-        return stepBuilderFactory.get("step5")
-                .tasklet(new Tasklet() {
-                    @Override
-                    public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-                        System.out.println("step5 has executed");
-                        return RepeatStatus.FINISHED;
-                    }
-                }).build();
-    }
 
 }
