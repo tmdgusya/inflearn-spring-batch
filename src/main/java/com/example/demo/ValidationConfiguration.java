@@ -17,17 +17,16 @@ public class ValidationConfiguration {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
-    private final String[] required = new String[]{"name", "date"};
-    private final String[] optional = new String[]{"count"};
-
+    /**
+     * 요게 있으면 그냥 실패해도 다시 시작하려 해도 안됨.
+     * @return
+     */
     @Bean
     public Job batchJob() {
         return this.jobBuilderFactory.get("batchJob")
                 .start(step1())
                 .next(step2())
-                .next(step3())
-                .validator(new CustomJobParametersValidator())
-                .validator(new DefaultJobParametersValidator(required, optional))
+                .preventRestart()
                 .build();
     }
 
@@ -45,15 +44,6 @@ public class ValidationConfiguration {
         return stepBuilderFactory.get("step2")
                 .tasklet(((stepContribution, chunkContext) -> {
                     System.out.println("step2 has executed");
-                    return RepeatStatus.FINISHED;
-                })).build();
-    }
-
-    @Bean
-    public Step step3() {
-        return stepBuilderFactory.get("step3")
-                .tasklet(((stepContribution, chunkContext) -> {
-                    System.out.println("step3 has executed");
                     return RepeatStatus.FINISHED;
                 })).build();
     }
