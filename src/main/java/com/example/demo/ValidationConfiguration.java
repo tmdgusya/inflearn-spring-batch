@@ -27,6 +27,7 @@ public class ValidationConfiguration {
                 .start(step1())
                 .next(step2())
                 .preventRestart()
+                .incrementer(new CustomJobParametersIncrementer())
                 .build();
     }
 
