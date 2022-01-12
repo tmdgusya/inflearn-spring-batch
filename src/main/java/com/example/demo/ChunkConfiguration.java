@@ -8,13 +8,13 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
+import java.util.Arrays;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,24 +41,34 @@ public class ChunkConfiguration {
     @Bean
     public Step step1() {
         return stepBuilderFactory.get("step1")
-                .<String, String>chunk(5)
-                .reader(new ListItemReader<String>(List.of("item1", "item2", "item3", "item4", "item5", "item6")))
-                .processor(new ItemProcessor<String, String>() {
-                    @Override
-                    public String process(String item) throws Exception {
-                        Thread.sleep(300);
-                        System.out.println("item = " + item);
-                        return "my" + item;
-                    }
-                })
-                .writer(new ItemWriter<String>() {
-                    @Override
-                    public void write(List<? extends String> items) throws Exception {
-                        Thread.sleep(300);
-                        System.out.println("items = " + items);
-                    }
-                })
+                .<Customer, Customer>chunk(3)
+                .reader(itemReader())
+                .processor(itemProcessor())
+                .writer(itemWriter())
                 .build();
+    }
+
+    @Bean
+    public ItemWriter<? super Customer> itemWriter() {
+        return new CustomItemWriter();
+    }
+
+    @Bean
+    public ItemProcessor<? super Customer, ? extends Customer> itemProcessor() {
+        return new CustomItemProcessor();
+    }
+
+    @Bean
+    public ItemReader<Customer> itemReader() {
+        return new CustomItemReader(
+                Arrays.asList(
+                        new Customer("user1"),
+                        new Customer("user2"),
+                        new Customer("user3"),
+                        new Customer("user4"),
+                        new Customer("user5")
+                )
+        );
     }
 
     @Bean
@@ -67,6 +77,7 @@ public class ChunkConfiguration {
                 .tasklet(new Tasklet() {
                     @Override
                     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
+                        System.out.println("step2 was executed");
                         return RepeatStatus.FINISHED;
                     }
                 }).build();
